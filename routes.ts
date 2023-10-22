@@ -54,13 +54,29 @@ User.init({
 
 
 //  Sync Model 
-sequelize.sync()
+try {
+    sequelize.sync()
+    console.log("Table Created");
+} catch (error) {
+    console.log("Error creating table");
+    
+}
 
 // Default page route
 router.get("/", (_, res) => {
     res.send("Youkoso");
 });
 
+// Find all Users
+router.get('/users', async (req, res) => {
+    return  await User.findAll().then(
+        users => {res.status(200).json({error: "false",message: "Results fetched",data: users});}
+    ).catch(error => {res.status(400).json({error: "true",message: "User not found",}); console.log(error);
+    });
+
+})
+
+// Create a User
 router.post("/user", async (req,res) => {
     try{
         const user = await User.create(req.body)
@@ -71,6 +87,7 @@ router.post("/user", async (req,res) => {
     }
 })
 
+// Create Multiple Users
 router.post("/bulk-user", async (req, res) => {
     try {
         const user = await User.bulkCreate(req.body)
