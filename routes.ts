@@ -1,6 +1,7 @@
 import { DataTypes, Model, Sequelize } from "sequelize";
 import { Router } from "express";
 import dotenv from "dotenv"
+import { Where } from "sequelize/types/utils";
 
 dotenv.config()
 
@@ -70,6 +71,19 @@ router.get("/", (_, res) => {
 // Find all Users
 router.get('/users', async (req, res) => {
     return  await User.findAll().then(
+        users => {res.status(200).json({error: "false",message: "Results fetched",data: users});}
+    ).catch(error => {res.status(400).json({error: "true",message: "User not found",}); console.log(error);
+    });
+
+})
+
+// Find User by specified fields
+router.get('/user', async (req, res) => {
+    return  await User.findAll({
+        where: {
+            "status": "0"
+        }
+}).then(
         users => {res.status(200).json({error: "false",message: "Results fetched",data: users});}
     ).catch(error => {res.status(400).json({error: "true",message: "User not found",}); console.log(error);
     });
