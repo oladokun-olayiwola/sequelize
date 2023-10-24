@@ -81,7 +81,7 @@ router.get('/users', async (req, res) => {
 router.get('/user', async (req, res) => {
     return  await User.findAll({
         where: {
-            "status": "0"
+            status: "0"
         }
 }).then(
         users => {res.status(200).json({error: "false",message: "Results fetched",data: users});}
@@ -108,6 +108,22 @@ router.post("/bulk-user", async (req, res) => {
         res.status(200).send({error: false, result: user, message: "User created successully"})
     } catch (error) {
         res.status(500).send({error: true, result: error, message: "Couldn't create user"})
+    }
+})
+
+// Find user by ID
+router.put("/user", (req, res) => {
+    try {
+       const user = User.update({
+        name: req.body.name,
+        email: req.body.email,
+        }, {where: {
+        id: req.body.id
+        }})
+        res.status(200).json({error: "false", message: "User updated Successfully", result: user})
+    }
+    catch(error) {
+        res.status(400).json({error: "true", message: "Failed to create user", result: error})
     }
 })
 
