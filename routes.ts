@@ -117,9 +117,11 @@ router.put("/user", (req, res) => {
        const user = User.update({
         name: req.body.name,
         email: req.body.email,
-        }, {where: {
+        }, {
+            where: {
         id: req.body.id
-        }})
+        }
+    })
         res.status(200).json({error: "false", message: "User updated Successfully", result: user})
     }
     catch(error) {
