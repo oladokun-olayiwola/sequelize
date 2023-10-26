@@ -127,6 +127,22 @@ router.put("/user", (req, res) => {
     catch(error) {
         res.status(400).json({error: "true", message: "Failed to create user", result: error})
     }
+})  
+
+router.delete("/user/:id", (req, res) => {
+    try {
+        User.destroy(
+            {
+                where: {
+                    id: req.params.id
+                }
+            }
+
+            )
+        res.status(200).json({error: "false", message: "User deleted Successfully"})
+    } catch (error) {
+        res.status(400).json({error: "true", message: "Failed to delete user", result: error})   
+    }
 })
 
 export const appRoutes = router
