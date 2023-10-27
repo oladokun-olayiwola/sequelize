@@ -188,6 +188,8 @@ router.delete("/user/:id", (req, res) => {
 });
 
 // Using raw query
+
+// Get all users with raw query
 router.get("/user-raw", (req, res) => {
   sequelize
     .query("SELECT * FROM secondtests", {
@@ -206,5 +208,25 @@ router.get("/user-raw", (req, res) => {
         .json({ error: "true", message: "User not found", data: error });
     });
 });
+
+router.put("/user-raw/:id", (req, res) => {
+    sequelize
+      .query(`UPDATE secondtests SET name = "${req.body.name}", email = "${req.body.email}" WHERE id = ${req.params.id}  `, {
+        type: QueryTypes.UPDATE,   
+      }) 
+      .then((result) => {
+        res.status(200).json({
+          error: false,
+          message: "User Updated",
+          result,
+        });
+      })
+      .catch((error) => {
+        res
+          .status(400)
+          .json({ error: "true", message: "User update failed", data: error });
+      });
+  });
+  
 
 export const appRoutes = router;
