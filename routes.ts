@@ -227,6 +227,25 @@ router.put("/user-raw/:id", (req, res) => {
           .json({ error: "true", message: "User update failed", data: error });
       });
   });
+
+  router.delete("/user-raw/:id", (req, res) => {
+    sequelize
+      .query(`DELETE secondtests WHERE id = ${req.params.id}`, {
+        type: QueryTypes.DELETE,   
+      }) 
+      .then((result) => {
+        res.status(200).json({
+          error: false,
+          message: "User Deleted",
+          result,
+        });
+      })
+      .catch((error) => {
+        res
+          .status(400)
+          .json({ error: "true", message: "Usr delete failed", data: error });
+      });
+  });
   
 
 export const appRoutes = router;
