@@ -3,14 +3,27 @@ import { StatusCodes } from "http-status-codes";
 import { UserData } from "./IUser";
 
 export const validateUserType = (req: Request, res: Response, next: NextFunction) => {
-    const { name, email, password, status }: UserData = req.body;
+    const requiredProperties: (keyof UserData)[] = ['name', 'email', 'password', 'status'];
+    const { ...userData }: UserData = req.body;
+    const missingProperties: (keyof UserData)[] = [];
   
-    if (name && email && password && status) {
+    requiredProperties.forEach((property) => {
+      if (!userData[property]) {
+        missingProperties.push(property);
+      }
+    });
+  
+    if (missingProperties.length === 0) {
       next();
     } else {
-      res.status(400).json({error: true, message: "Invalid Request Body"});
+      res.status(400).json({
+        error: true,
+        message: "Invalid Request Body",
+        missingProperties: missingProperties
+      });
     }
   };
+  
 
 export const errorHandler = (
     err: Error,
