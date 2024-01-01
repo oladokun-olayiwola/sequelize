@@ -17,5 +17,9 @@
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.6.2",
     "sequelize": "^6.33.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "http-status-codes": "^2.3.0"
   }
 }
