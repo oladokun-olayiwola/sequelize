@@ -114,7 +114,7 @@ app.post("/login", async (req: Request, res: Response) => {
         return createErrorResponse(res, StatusCodes.BAD_REQUEST, "Invalid Password", true)
     }
     const { email: userEmail, id } = existingUser
-    const userToken = JWT.sign({ userEmail, id }, "process.env.JWT_SECRET as string", {
+    const userToken = JWT.sign({ userEmail, id }, process.env.JWT_SECRET as string, {
         expiresIn: "2 days",
     })
 
