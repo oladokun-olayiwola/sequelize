@@ -17,3 +17,8 @@ export interface UserData {
     email: string,
     password: string,
 }
+
+export interface VerifiedToken {
+    email: string;
+    id: string;
+}
