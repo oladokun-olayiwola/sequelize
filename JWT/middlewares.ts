@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
-import { UserData } from "./IUser";
+import { RegistrationRequest } from "./IUser";
 
 export const validateUserType = (req: Request, res: Response, next: NextFunction) => {
-    const requiredProperties: (keyof UserData)[] = ['name', 'email', 'password', 'status'];
-    const { ...userData }: UserData = req.body;
-    const missingProperties: (keyof UserData)[] = [];
+    const requiredProperties: (keyof RegistrationRequest)[] = ['name', 'email', 'password', 'status'];
+    const { ...userData }: RegistrationRequest = req.body;
+    const missingProperties: (keyof RegistrationRequest)[] = [];
   
     requiredProperties.forEach((property) => {
       if (!userData[property]) {
@@ -40,3 +40,10 @@ export const errorHandler = (
 
     res.status(500).json({ error: 'Internal Server Error' });
 }
+
+export const createErrorResponse = (res: Response, status: StatusCodes, message: string, error: Boolean) => {
+    return res.status(status).json({
+        error,
+        message,
+    });
+};
