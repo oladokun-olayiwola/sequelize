@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
-import { RegistrationRequest } from "./IUser";
+import { RegistrationRequest, VerifiedToken } from "./IUser";
+import JWT from "jsonwebtoken";
 
 export const validateUserType = (req: Request, res: Response, next: NextFunction) => {
     const requiredProperties: (keyof RegistrationRequest)[] = ['name', 'email', 'password', 'status'];
@@ -47,3 +48,30 @@ export const createErrorResponse = (res: Response, status: StatusCodes, message:
         message,
     });
 };
+
+declare global {
+    namespace Express {
+        interface Request {
+            user?: VerifiedToken;
+        }
+    }
+}
+
+export const verifyToken = (req: Request, res: Response, next: NextFunction) => {
+    const userToken = req.headers.authorization    
+    if(!userToken) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+            error: true,
+            message: "Token not found"
+        })
+    }
+
+    const verifiedToken = JWT.verify(userToken, process.env.JWT_SECRET as string)    
+
+    if (!verifiedToken) {
+        return createErrorResponse(res, StatusCodes.UNAUTHORIZED, "Invalid token", true)
+    }
+
+    req.user = verifiedToken as VerifiedToken
+    next()
+}
