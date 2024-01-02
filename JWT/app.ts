@@ -78,6 +78,16 @@ app.post("/", validateUserType, async (req: Request, res: Response) => {
     try {
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
+    const existingUser = await User.findOne({
+        where: {email},
+    })
+    if(existingUser) {
+        res.status(StatusCodes.BAD_REQUEST).json({
+            error: true,
+            message: "User already exists"
+        })
+        return
+    }
     const user = await User.create({
         name, email, password: hashedPassword, status
     })
