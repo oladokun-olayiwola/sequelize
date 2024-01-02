@@ -3,9 +3,10 @@ import bodyParser from 'body-parser';
 import { DataTypes, Sequelize } from "sequelize";
 import { configDotenv } from "dotenv";
 import bcrypt from "bcrypt";
-import { errorHandler, validateUserType } from "./middlewares";
+import { createErrorResponse, errorHandler, validateUserType } from "./middlewares";
 import { StatusCodes } from 'http-status-codes';
-import { UserData } from "./IUser";
+import { LoginRequest, RegistrationRequest, UserData } from "./IUser";
+import JWT from "jsonwebtoken"
 
 configDotenv()
 const app = express()
@@ -20,17 +21,17 @@ const sequelize = new Sequelize(process.env.DATABASE_NAME as string, process.env
         host: "localhost",
         dialect: "mysql"
     }
-    )
-    
-    try {
-        sequelize.authenticate()
-        console.log("Connection to database established");
-    } catch (error) {
-        console.log("error creating connection to databse", error)
-    }
-    
-    const User = sequelize.define("User", {
-        id: {
+)
+
+try {
+    sequelize.authenticate()
+    console.log("Connection to database established");
+} catch (error) {
+    console.log("error creating connection to databse", error)
+}
+
+const User = sequelize.define("User", {
+    id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
@@ -72,35 +73,59 @@ app.get("/", (req, res) => {
     })
 })
 
-// Register User API
+// Register User
 app.post("/", validateUserType, async (req: Request, res: Response) => {
-    const { name, email, password, status }: UserData = req.body
+    const { name, email, password, status }: RegistrationRequest = req.body
     try {
-    const salt = await bcrypt.genSalt(10)
-    const hashedPassword = await bcrypt.hash(password, salt)
-    const existingUser = await User.findOne({
-        where: {email},
-    })
-    if(existingUser) {
-        res.status(StatusCodes.BAD_REQUEST).json({
-            error: true,
-            message: "User already exists"
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(password, salt)
+        const existingUser = await User.findOne({
+            where: { email },
         })
-        return
+        if (existingUser) {
+            return createErrorResponse(res, StatusCodes.BAD_REQUEST, "User already exists", true)
+        }
+        const user = await User.create({
+            name, email, password: hashedPassword, status
+        })
+        res.status(StatusCodes.CREATED).json({
+            error: false,
+            message: "User created successfully",
+            user
+        })
     }
-    const user = await User.create({
-        name, email, password: hashedPassword, status
-    })
-    res.status(StatusCodes.CREATED).json({
-        error: false,
-        message: "User created successfully",
-        user
-    })}
     catch (error) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send('Internal Server Error');
     }
 })
 
+// User Login
+app.post("/login", async (req: Request, res: Response) => {
+    const { email, password }: LoginRequest = req.body
+
+    const existingUser: UserData | null = await User.findOne({
+        where: { email },
+    }) as UserData | null
+    if (!existingUser) {
+        return createErrorResponse(res, StatusCodes.BAD_REQUEST, "User not found", true)
+    }
+    const checkPassword = await bcrypt.compare(password, existingUser.password)
+    if (!checkPassword) {
+        return createErrorResponse(res, StatusCodes.BAD_REQUEST, "Invalid Password", true)
+    }
+    const { email: userEmail, id } = existingUser
+    const userToken = JWT.sign({ userEmail, id }, "process.env.JWT_SECRET as string", {
+        expiresIn: "2 days",
+    })
+
+    res.status(StatusCodes.OK).json({
+        error: false,
+        message: "User logged in",
+        user: existingUser,
+        token: userToken,
+    })
+
+})
 
 app.use(errorHandler);
 app.listen(PORT, () => {
