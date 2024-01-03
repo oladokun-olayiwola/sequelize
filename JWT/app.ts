@@ -7,9 +7,10 @@ import {
   createErrorResponse,
   errorHandler,
   validateUserType,
+  verifyToken,
 } from './middlewares';
 import { StatusCodes } from 'http-status-codes';
-import { LoginRequest, RegistrationRequest, UserData } from './IUser';
+import { LoginRequest, RegistrationRequest, UserData, VerifiedUser } from './IUser';
 import JWT from 'jsonwebtoken';
 
 configDotenv();
@@ -156,6 +157,16 @@ app.post('/login', async (req: Request, res: Response) => {
     token: userToken,
   });
 });
+
+// User Profile
+app.get("/profile", verifyToken , (req: Request, res: Response) => {
+  const user: VerifiedUser | undefined = req.user
+  res.status(StatusCodes.OK).json({
+    error: false,
+    message: "User Data generated",
+    user
+  })
+})
 
 app.use(errorHandler);
 app.listen(PORT, () => {
