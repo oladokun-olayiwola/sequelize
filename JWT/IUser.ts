@@ -18,7 +18,7 @@ export interface UserData {
   password: string;
 }
 
-export interface VerifiedToken {
+export interface VerifiedUser {
   email: string;
   id: string;
 }

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { RegistrationRequest, VerifiedToken } from './IUser';
+import { RegistrationRequest, VerifiedUser } from './IUser';
 import JWT from 'jsonwebtoken';
 
 export const validateUserType = (
@@ -64,7 +64,7 @@ export const createErrorResponse = (
 declare global {
   namespace Express {
     interface Request {
-      user?: VerifiedToken;
+      user?: VerifiedUser;
     }
   }
 }
@@ -90,6 +90,6 @@ export const verifyToken = (
       true
     );
   }
-  req.user = verifiedToken as VerifiedToken;
+  req.user = verifiedToken as VerifiedUser;
   next();
 };
