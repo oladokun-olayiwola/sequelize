@@ -15,6 +15,10 @@ module.exports = {
       description: {
         type: Sequelize.STRING
       },
+      amount: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
